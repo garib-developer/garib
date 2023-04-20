@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Speech Recognition Example</title>
+  <style>
+    .redLight {
+      width: 20px;
+      height: 20px;
+      background-color: red;
+      border-radius: 50%;
+      margin-right: 5px;
+      display: none;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.1/annyang.min.js"></script>
+</head>
+<body>
+  <h1>Speech Recognition Example</h1>
+  <div id="recordingIndicator">
+    <div class="redLight"></div>
+    <div class="redLight"></div>
+    <div class="redLight"></div>
+  </div>
+  <button id="startButton">Start Recording</button>
+  <p id="response"></p>
+
+  <script>
+    const startButton = document.getElementById('startButton');
+    const response = document.getElementById('response');
+    const recordingIndicator = document.getElementById('recordingIndicator');
+
+    let isRecording = false;
+    let timer = null;
+
+    startButton.addEventListener('click', () => {
+      if (!isRecording) {
+        startRecording();
+      } else {
+        stopRecording();
+      }
+    });
+
+    function startRecording() {
+      annyang.start();
+      annyang.addCallback('result', (phrases) => {
+        clearTimeout(timer);
+
+        const lastTranscript = phrases[0];
+        response.textContent = lastTranscript;
+
+        timer = setTimeout(() => {
+          response.textContent = 'Your answer is finished as you did not talk for continuous 3 seconds.';
+        }, 3000);
+      });
+
+      startButton.textContent = 'Stop Recording';
+      recordingIndicator.style.display = 'block';
+      isRecording = true;
+    }
+
+    function stopRecording() {
+      annyang.abort();
+      clearTimeout(timer);
+      response.textContent = '';
+      recordingIndicator.style.display = 'none';
+      startButton.textContent = 'Start Recording';
+      isRecording = false;
+    }
+  </script>
+</body>
+</html>
+
